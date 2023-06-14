@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from sklearn.cluster import  k_means
 import scipy
+from scipy import ndimage
 import scipy.io as sio
 import PIL
 from PIL import Image
@@ -93,7 +94,7 @@ def print_network(name, net):
     print('name={:s}, Total number={:d}'.format(name, num_params))
 
 def nmarprior(im,threshWater,threshBone,miuAir,miuWater,smFilter):
-    imSm = scipy.ndimage.filters.convolve(im, smFilter, mode='nearest')
+    imSm = ndimage.filters.convolve(im, smFilter, mode='nearest')
     priorimgHU = imSm
     priorimgHU[imSm <= threshWater] = miuAir
     h, w = imSm.shape[0], imSm.shape[1]
@@ -166,6 +167,6 @@ def reload_nii(nii_path):
     nibabel.save(img, nii_path)
 
 if __name__ == "__main__":
-    # main()
-    reload_nii(r"C:\Users\Image\jow\code\InDuDoNet_plus\results\CLINIC_metal\X_mar\9_image_9_xa_3d_mask_40_degs_512_new.nii.gz")
+    main()
+    # reload_nii(r"C:\Users\Image\jow\code\InDuDoNet_plus\results\CLINIC_metal\X_mar\9_image_9_xa_3d_mask_40_degs_512_new.nii.gz")
 
