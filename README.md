@@ -17,7 +17,30 @@ During the computed tomography (CT) imaging process, metallic implants within pa
 
 
 ## Dependicies 
-Refer to [InDuDoNet](https://github.com/yiluzhou1/InDuDoNet)
+Refer to **environment.yml**. This repository is tested under the following system settings:
+
+Python 3.10
+
+Pytorch 2.0.1
+
+CUDA 11.8
+
+GPU NVIDIA A1000
+
+**For running the code,  please first test whether ODL and Astra are both installed correctly. This is quite important.**
+
+If using Anaconda, you may try the following steps:
+```
+conda create --name InDuDoNet python=3.10
+conda activate InDuDoNet
+conda install -c astra-toolbox/label/dev astra-toolbox
+pip install https://github.com/yiluzhou1/odl/archive/refs/heads/master.zip
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install matplotlib h5py scikit-learn scikit-image nibabel pyyaml tqdm
+```
+
+Note: To avoid "libiomp5md.dll" error, you may need to search and rename "libiomp5md.dll" in your env folder
+
 
 ## Dataset & Training & Testing
 Refer to [InDuDoNet](https://github.com/hongwang01/InDuDoNet) for the settings. 
