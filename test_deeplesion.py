@@ -11,6 +11,7 @@ from PIL import Image
 from network.indudonet_plus import InDuDoNet_plus
 from deeplesion.build_gemotry import initialization, build_gemotry
 import scipy
+from scipy import ndimage
 from sklearn.cluster import  k_means
 import scipy.io as sio
 import warnings
@@ -65,7 +66,7 @@ def normalize(data, minmax):
 
 
 def nmarprior(im,threshWater,threshBone,miuAir,miuWater,smFilter):
-    imSm = scipy.ndimage.filters.convolve(im, smFilter, mode='nearest')
+    imSm = ndimage.filters.convolve(im, smFilter, mode='nearest')
     priorimgHU = imSm
     priorimgHU[imSm <= threshWater] = miuAir
     h, w = imSm.shape[0], imSm.shape[1]

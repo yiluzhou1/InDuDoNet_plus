@@ -73,7 +73,7 @@ def test_image(allXma, allXLI, allM, allSma, allSLI, allTr, vol_idx, slice_idx):
     SLI = allSLI[vol_idx][...,slice_idx]
     Tr = allTr[vol_idx][...,slice_idx]
     #jow
-    M = np.array(Image.fromarray(M).resize((416, 416), PIL.Image.BILINEAR)) # maybe mismatch?
+    M = np.array(Image.fromarray(M).resize((416, 416), PIL.Image.Resampling.BILINEAR)) # maybe mismatch?
     Xprior = nmar_prior(XLI, M)
     Xprior = normalize(Xprior, image_get_minmax())  # *255
     Xma = normalize(Xma, image_get_minmax())  # *255
