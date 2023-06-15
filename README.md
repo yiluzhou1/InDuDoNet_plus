@@ -17,7 +17,7 @@ During the computed tomography (CT) imaging process, metallic implants within pa
 
 
 ## Dependicies 
-Refer to [InDuDoNet](https://github.com/hongwang01/InDuDoNet)
+Refer to [InDuDoNet](https://github.com/yiluzhou1/InDuDoNet)
 
 ## Dataset & Training & Testing
 Refer to [InDuDoNet](https://github.com/hongwang01/InDuDoNet) for the settings. 
@@ -29,11 +29,15 @@ CUDA_VISIBLE_DEVICES=0 python train.py --data_path "deeplesion/train/" --log_dir
 ```
 
 
-##Testing
+## Testing
 ```
-CUDA_VISIBLE_DEVICES=0 python test_deeplesion.py --data_path "deeplesion/test/" --model_dir "pretrained_model/" --save_path "results/deeplesion/" 
+CUDA_VISIBLE_DEVICES=0 python test_deeplesion.py --data_path "deeplesion/test/" --model_dir "pretrained_model/InDuDoNet+_latest.pt" --save_path "results/deeplesion/" 
 ```
 
+### For CLINIC-metal
+```
+CUDA_VISIBLE_DEVICES=0 python test_clinic.py --data_path "CLINIC_metal/test/" --model_dir "pretrained_model/InDuDoNet+_latest.pt" --save_path "results/CLINIC_metal/"
+```
 
 ## Experiments on Synthesized Data
 <div  align="center"><img src="figs/deeplesion_boxplot.jpg" height="100%" width="100%" alt=""/></div>
