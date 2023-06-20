@@ -23,6 +23,7 @@ parser.add_argument("--model_dir", type=str, default="./pretrained_model/InDuDoN
 parser.add_argument("--data_path", type=str, default="CLINIC_metal/test/", help='path to training data')
 parser.add_argument("--use_GPU", type=bool, default=True, help='use GPU or not')
 parser.add_argument("--save_path", type=str, default="results/CLINIC_metal/", help='path to training data')
+parser.add_argument("--keep_originalshape", type=str, default=False, help='whether to keep the original shape of the image')
 parser.add_argument('--num_channel', type=int, default=32, help='the number of dual channels')
 parser.add_argument('--T', type=int, default=4, help='the number of ResBlocks in every ProxNet')
 parser.add_argument('--S', type=int, default=10, help='the number of total iterative stages')
@@ -126,13 +127,15 @@ def main():
     time_test = 0
     count = 0
     print('--------------load---------------all----------------nii-------------')
-    allXma, allXLI, allM, allSma, allSLI, allTr, allaffine, allfilename = clinic_input_data(opt.data_path)
+    allXma, allXLI, allM, allSma, allSLI, allTr, allaffine, allfilename, alloriginalshape = clinic_input_data(opt.data_path)
     print('--------------test---------------all----------------nii-------------')
     for vol_idx in range(len(allXma)):
         print('test %d th volume.......' % vol_idx)
         num_s = allXma[vol_idx].shape[2]
         pre_Xout = np.zeros_like(allXma[vol_idx])
         pre_name = allfilename[vol_idx]
+        originalshape = alloriginalshape[vol_idx]
+        original_volume = np.zeros((originalshape[0], originalshape[1], num_s), dtype='float32')
         for slice_idx in range(num_s):
             Xma, XLI, M, Sma, SLI, Tr, Xprior  = test_image(allXma, allXLI, allM, allSma, allSLI, allTr, vol_idx, slice_idx)
 
@@ -147,7 +150,15 @@ def main():
             print('Times: ', dur_time)
             Xout= ListX[-1] / 255.0
             pre_Xout[..., slice_idx] = Xout.data.cpu().numpy().squeeze()
-        nibabel.save(nibabel.Nifti1Image(pre_Xout, allaffine[vol_idx]), Pred_nii + pre_name)
+            # Convert to original size
+            original_volume[..., slice_idx] = np.array(Image.fromarray(pre_Xout[..., slice_idx]).resize((originalshape[1], originalshape[0]), PIL.Image.Resampling.BILINEAR))
+        # Save nii
+        if opt.keep_originalshape == False:
+            # using the default shape
+            nibabel.save(nibabel.Nifti1Image(pre_Xout, allaffine[vol_idx]), Pred_nii + pre_name)
+        else: # keep original shape
+            nibabel.save(nibabel.Nifti1Image(original_volume, allaffine[vol_idx]), Pred_nii + pre_name)
+
         if vol_idx == 1:
             img = nibabel.load(Pred_nii + pre_name)
             qform = img.get_qform()

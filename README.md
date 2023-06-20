@@ -59,7 +59,7 @@ CUDA_VISIBLE_DEVICES=0 python test_deeplesion.py --data_path "deeplesion/test/" 
 
 ### For CLINIC-metal
 ```
-CUDA_VISIBLE_DEVICES=0 python test_clinic.py --data_path "CLINIC_metal/test/" --model_dir "pretrained_model/InDuDoNet+_latest.pt" --save_path "results/CLINIC_metal/"
+CUDA_VISIBLE_DEVICES=0 python test_clinic.py --data_path "CLINIC_metal/test/" --model_dir "pretrained_model/InDuDoNet+_latest.pt" --save_path "results/CLINIC_metal/" --keep_originalshape False
 ```
 
 ## Experiments on Synthesized Data

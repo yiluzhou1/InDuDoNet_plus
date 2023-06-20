@@ -21,6 +21,7 @@ allSLI = []
 allTr = []
 allaffine = []
 allfilename=[]
+alloriginalshape=[] # original shape of the volume
 # process and save all the to-the-tested volumes
 def clinic_input_data(test_path):
     for file_name in os.listdir(test_path):
@@ -37,7 +38,7 @@ def clinic_input_data(test_path):
         Sma = np.zeros_like(Tr)
         SLI =  np.zeros_like(Tr)
         for i in range(num_s):
-            image = np.array(Image.fromarray(imag[:,:,i]).resize((CTpara['imPixNum'], CTpara['imPixNum']), PIL.Image.BILINEAR))
+            image = np.array(Image.fromarray(imag[:,:,i]).resize((CTpara['imPixNum'], CTpara['imPixNum']), PIL.Image.Resampling.BILINEAR))
             image[image < -1000] = -1000
             image = image / 1000 * 0.192 + 0.192
             Xma[...,i] = image
@@ -55,7 +56,8 @@ def clinic_input_data(test_path):
         allSLI.append(SLI)
         allTr.append(Tr)
         allfilename.append(file_name)
-    return allXma, allXLI, allM, allSma, allSLI, allTr, allaffine, allfilename
+        alloriginalshape.append(imag.shape)
+    return allXma, allXLI, allM, allSma, allSLI, allTr, allaffine, allfilename, alloriginalshape
 
 
 def interpolate_projection(proj, metalTrace):
