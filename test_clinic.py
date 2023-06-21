@@ -1,5 +1,4 @@
 import os
-os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 import argparse
 import numpy as np
 import torch
@@ -16,32 +15,8 @@ import nibabel
 import time
 import warnings
 warnings.filterwarnings("ignore")
-
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-parser = argparse.ArgumentParser(description="YU_Test")
-parser.add_argument("--model_dir", type=str, default="./pretrained_model/InDuDoNet+_latest.pt", help='path to model and log files')
-parser.add_argument("--data_path", type=str, default="CLINIC_metal/test/", help='path to training data')
-parser.add_argument("--use_GPU", type=bool, default=True, help='use GPU or not')
-parser.add_argument("--save_path", type=str, default="results/CLINIC_metal/", help='path to training data')
-parser.add_argument("--keep_originalshape", type=str, default=False, help='whether to keep the original shape of the image')
-parser.add_argument('--num_channel', type=int, default=32, help='the number of dual channels')
-parser.add_argument('--T', type=int, default=4, help='the number of ResBlocks in every ProxNet')
-parser.add_argument('--S', type=int, default=10, help='the number of total iterative stages')
-parser.add_argument('--eta1', type=float, default=1, help='initialization for stepsize eta1')
-parser.add_argument('--eta2', type=float, default=5, help='initialization for stepsize eta2')
-parser.add_argument('--alpha', type=float, default=0.5, help='initialization for weight factor')
-opt = parser.parse_args()
-def mkdir(path):
-    folder = os.path.exists(path)
-    if not folder:
-        os.makedirs(path)
-        print("---  new folder...  ---")
-        print("---  " + path + "  ---")
-    else:
-        print("---  There exsits folder " + path + " !  ---")
-Pred_nii = opt.save_path +'/X_mar/'
-mkdir(Pred_nii)
-
+os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 sigma = 1
 smFilter =  sio.loadmat('deeplesion/gaussianfilter.mat')['smFilter']
@@ -117,9 +92,24 @@ def nmar_prior(XLI, M):
     imPriorNMAR = nmarprior(XLI, threshWater2, threshBone2, miuAir, miuWater, smFilter)
     return imPriorNMAR
 
-def main():
+def metal_artifact_reduction(data_path = 'CLINIC_metal/test/', save_path = "results/CLINIC_metal/" ):
+    # data_path can be a folder or a single file
     # Build model
-    print('Loading model ...\n')
+    print('Loading InDuDoNet_plus model ...\n')
+    if 'opt' not in locals(): # running in another python file, not in command line
+        opt = {
+            'S': 10, # the number of total iterative stages
+            'num_channel': 32, # the number of dual channels
+            'T': 4, # the number of ResBlocks in every ProxNet
+            'eta1': 1, # initialization for stepsize eta1
+            'eta2': 5, # initialization for stepsize eta2
+            'alpha': 0.5, # initialization for weight factor
+            'model_dir': "pretrained_model/InDuDoNet+_latest.pt", # path to model and log files
+            'data_path': data_path, # path to data
+            'save_path': save_path, # path to save results
+            'keep_originalshape': True, # whether to keep the original image shape
+        }
+    
     net = InDuDoNet_plus(opt).cuda()
     print_network("InDuDoNet", net)
     net.load_state_dict(torch.load(opt.model_dir))
@@ -159,15 +149,15 @@ def main():
         else: # keep original shape
             nibabel.save(nibabel.Nifti1Image(original_volume, allaffine[vol_idx]), Pred_nii + pre_name)
 
-        if vol_idx == 1:
-            img = nibabel.load(Pred_nii + pre_name)
-            qform = img.get_qform()
-            img.set_qform(qform)
-            sfrom = img.get_sform()
-            img.set_sform(sfrom)
-            nibabel.save(img, Pred_nii + pre_name)
-        count += 1
-    print('Avg.time={:.4f}'.format(time_test / count))
+    #     if vol_idx == 1:
+    #         img = nibabel.load(Pred_nii + pre_name)
+    #         qform = img.get_qform()
+    #         img.set_qform(qform)
+    #         sfrom = img.get_sform()
+    #         img.set_sform(sfrom)
+    #         nibabel.save(img, Pred_nii + pre_name)
+    #     count += 1
+    # print('Avg.time={:.4f}'.format(time_test / count))
 
 def reload_nii(nii_path):
     img = nibabel.load(nii_path)
@@ -178,6 +168,30 @@ def reload_nii(nii_path):
     nibabel.save(img, nii_path)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="YU_Test")
+    parser.add_argument("--model_dir", type=str, default="./pretrained_model/InDuDoNet+_latest.pt", help='path to model and log files')
+    parser.add_argument("--data_path", type=str, default="CLINIC_metal/test/", help='path to training data')
+    parser.add_argument("--use_GPU", type=bool, default=True, help='use GPU or not')
+    parser.add_argument("--save_path", type=str, default="results/CLINIC_metal/", help='path to training data')
+    parser.add_argument("--keep_originalshape", type=str, default=False, help='whether to keep the original shape of the image')
+    parser.add_argument('--num_channel', type=int, default=32, help='the number of dual channels')
+    parser.add_argument('--T', type=int, default=4, help='the number of ResBlocks in every ProxNet')
+    parser.add_argument('--S', type=int, default=10, help='the number of total iterative stages')
+    parser.add_argument('--eta1', type=float, default=1, help='initialization for stepsize eta1')
+    parser.add_argument('--eta2', type=float, default=5, help='initialization for stepsize eta2')
+    parser.add_argument('--alpha', type=float, default=0.5, help='initialization for weight factor')
+    opt = parser.parse_args()
+    def mkdir(path):
+        folder = os.path.exists(path)
+        if not folder:
+            os.makedirs(path)
+            print("---  new folder...  ---")
+            print("---  " + path + "  ---")
+        else:
+            print("---  There exsits folder " + path + " !  ---")
+    Pred_nii = opt.save_path +'/X_mar/'
+    mkdir(Pred_nii)    
+
+    metal_artifact_reduction()
     # reload_nii(r"C:\Users\Image\jow\code\InDuDoNet_plus\results\CLINIC_metal\X_mar\9_image_9_xa_3d_mask_40_degs_512_new.nii.gz")
 
